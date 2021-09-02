@@ -1,16 +1,9 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[13]:
-
-
 # dependencies
 import numpy as np
 import pandas as pd
 import sqlalchemy
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy import create_engine, func
-import datetime as dt
 from sqlalchemy.orm import Session
 
 # import flask
