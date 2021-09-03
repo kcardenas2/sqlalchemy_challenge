@@ -3,7 +3,7 @@ import pandas as pd
 import datetime as dt
 
 import sqlalchemy
-from sqlalchemy.ext.automap import automap_base
+from sqlalchemy.ext.automap import automap_base, name_for_collection_relationship
 from sqlalchemy import create_engine, func
 from sqlalchemy.orm import Session
 
@@ -62,14 +62,17 @@ def precipitation():
 @app.route("/api/v1.0/stations")
 def stations():
     session = Session(engine)
-    results= session.query(Station.station).all()
+    station_data= [Station.station, Station.name]
+    results= session.query(*station_data).all()
     session.close()
-    Stations=[]
-    for Stations in stations:
+    stations=[]
+    for station,name in results:
         station_dict={}
-        Stations.append(station_dict)
+        station_dict["name"]= name
+        station_dict["stations"]= station
+        stations.append(station_dict)
 
-    return jsonify(Stations)
+    return jsonify(stations)
 
 @app.route("/api/v1.0/tobs")
 def tobs():
