@@ -77,18 +77,23 @@ def stations():
 @app.route("/api/v1.0/tobs")
 def tobs():
     session = Session(engine)
-    recent_date= session.query(Measurement.date).order_by(Measurement.date.desc()).first()[0]
-    year_ago= dt.date(2017,8,23)-dt.timedelta(days=365)
-    years_ago=[Measurement.date, Measurement.tobs]
-    results= session.query(*years_ago).filter(Measurement.date >= years_ago).all()
+    results= (session.query(Measurement.date, Measurement.tobs, Measurement.prcp).\
+                    filter(Measurement.station == 'USC00519281'). 
+                    filter(Measurement.date >= '2017-08-23').\
+                    order_by(Measurement.date).all())
+    
+    
     session.close()
-    tobs=[]
-    for date, tobs in results:
+    tobs= []
+    for prcp, date, tobs in results:
         tobs_dict={}
-        tobs_dict["Date"] = date
-        tobs_dict["Temp observations"]= tobs
+        tobs_dict["prcp"]= prcp
+        tobs_dict["date"]= date
+        tobs_dict["tobs"]= tobs
+
         tobs.append(tobs_dict)
-    return(tobs)
+
+    return jsonify(tobs)
 
 
 @app.route("/api/v1.0/<start>")
@@ -98,12 +103,13 @@ def start(start):
              func.max(Measurement.tobs),
              func.avg(Measurement.tobs)).filter(Measurement.date >= start).all()
     session.close()
+
     observations=[]
     for min,avg,max in results:
         start_dict={}
-        start_dict["Min"]=min
+        start_dict["min"]=min
         start_dict["Average"]=avg
-        start_dict["Max"]=max
+        start_dict["max"]=max
         observations.append(start_dict)
 
     return jsonify(observations)
@@ -112,17 +118,17 @@ def start(start):
 def first_last(start, end):
     session = Session(engine)
     results=session.query(func.min(Measurement.tobs),
-             func.max(Measurement.tobs),
-             func.avg(Measurement.tobs)).\
+             func.avg(Measurement.tobs),
+             func.max(Measurement.tobs)).\
                  filter(Measurement.date >= start).filter(Measurement.date <= end).all()
     session.close()
 
     Both=[]
     for min,avg,max in results: 
         start_end_dict={}
-        start_end_dict["Min"]=min
-        start_end_dict["Average"]=avg
-        start_end_dict["Max"]=max
+        start_end_dict["Min"]= min
+        start_end_dict["Average"]= avg
+        start_end_dict["Max"]= max
         Both.append(start_end_dict)
 
     return jsonify(Both)
