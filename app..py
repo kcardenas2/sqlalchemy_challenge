@@ -101,7 +101,7 @@ def start(start):
     session = Session(engine)
     results=session.query(func.min(Measurement.tobs),
              func.max(Measurement.tobs),
-             func.avg(Measurement.tobs)).filter(Measurement.date >= start).all()
+             func.avg(Measurement.tobs)).filter(Measurement.station == 'USC00519281').all()
     session.close()
 
     observations=[]
@@ -117,10 +117,10 @@ def start(start):
 @app.route("/api/v1.0/<start>/<end>")
 def first_last(start, end):
     session = Session(engine)
-    results=session.query(func.min(Measurement.tobs),
-             func.avg(Measurement.tobs),
-             func.max(Measurement.tobs)).\
-                 filter(Measurement.date >= start).filter(Measurement.date <= end).all()
+    results=session.query(Measurement.station, Measurement.date, Measurement.tobs).\
+filter(Measurement.date>="2016-08-24").\
+filter(Measurement.date<="2017-08-23").\
+filter(Measurement.station=="USC00519281").all()
     session.close()
 
     Both=[]
